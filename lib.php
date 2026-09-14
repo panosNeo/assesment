@@ -74,11 +74,9 @@ readonly class Products
      */
     public function add_product_to_xml(array $data): void
     {
-        $name = trim((string) ($data['NAME'] ?? ''));
+        $this->validate_new_product($data);
 
-        if ($name === '') {
-            throw new InvalidArgumentException('The product name is required.');
-        }
+        $name = trim((string) ($data['NAME'] ?? ''));
 
         $dom = new DOMDocument();
         $dom->preserveWhiteSpace = false;
@@ -96,7 +94,6 @@ readonly class Products
 
         $product = $dom->createElement('PRODUCT');
 
-        // NAME, BARCODE and WEIGHT are kept as CDATA, the same way the existing products are written
         $product->appendChild($this->create_cdata_element($dom, 'NAME', $name));
         $product->appendChild($dom->createElement('PRICE', trim((string) ($data['PRICE'] ?? ''))));
         $product->appendChild($dom->createElement('QUANTITY', trim((string) ($data['QUANTITY'] ?? ''))));
@@ -113,7 +110,7 @@ readonly class Products
         $product->appendChild($dom->createElement('MANUFACTURER', trim((string) ($data['MANUFACTURER'] ?? ''))));
         $product->appendChild($this->create_cdata_element($dom, 'BARCODE', trim((string) ($data['BARCODE'] ?? ''))));
         $product->appendChild($this->create_cdata_element($dom, 'WEIGHT', trim((string) ($data['WEIGHT'] ?? ''))));
-        $product->appendChild($dom->createElement('INSTOCK', ($data['INSTOCK'] ?? 'Y') === 'N' ? 'N' : 'Y'));
+        $product->appendChild($dom->createElement('INSTOCK', ($data['INSTOCK'] ?? 'N')));
         $product->appendChild($dom->createElement('AVAILABILITY', trim((string) ($data['AVAILABILITY'] ?? ''))));
 
         $products_list->appendChild($product);
@@ -140,5 +137,47 @@ readonly class Products
         $element->appendChild($dom->createCDATASection($value));
 
         return $element;
+    }
+
+    /**
+     * Validate the posted data of a new product
+     *
+     * Name is required
+     *
+     * @param  array<array-key, mixed> $data
+     *
+     * @throws InvalidArgumentException
+     */
+    private function validate_new_product(array $data): void
+    {
+        $errors = [];
+
+        if (trim((string) ($data['NAME'] ?? '')) === '') {
+            $errors[] = 'The product name is required.';
+        }
+
+        $price = trim((string) ($data['PRICE'] ?? ''));
+        if ($price !== '' && (!is_numeric($price) || (float) $price < 0)) {
+            $errors[] = 'The price must be a positive number.';
+        }
+
+        $quantity = trim((string) ($data['QUANTITY'] ?? ''));
+        if ($quantity !== '' && (!ctype_digit($quantity))) {
+            $errors[] = 'The quantity must be a positive whole number.';
+        }
+
+        $category_id = trim((string) ($data['CATEGORY_ID'] ?? ''));
+        if ($category_id !== '' && !ctype_digit($category_id)) {
+            $errors[] = 'The category id must be a number.';
+        }
+
+        $instock = trim((string) ($data['INSTOCK'] ?? 'N'));
+        if (!in_array($instock, ['Y', 'N'], true)) {
+            $errors[] = 'In stock must be either Y or N.';
+        }
+
+        if ($errors !== []) {
+            throw new InvalidArgumentException(implode(' ', $errors));
+        }
     }
 }
