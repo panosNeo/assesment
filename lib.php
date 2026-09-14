@@ -62,4 +62,83 @@ readonly class Products
     {
         return htmlspecialchars(trim((string) $value));
     }
+
+    /**
+     * Add a new PRODUCT to the xml file
+     *
+     * @param  array<array-key, mixed> $data
+     *
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     * @throws \DOMException
+     */
+    public function add_product_to_xml(array $data): void
+    {
+        $name = trim((string) ($data['NAME'] ?? ''));
+
+        if ($name === '') {
+            throw new InvalidArgumentException('The product name is required.');
+        }
+
+        $dom = new DOMDocument();
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+
+        if (@$dom->load($this->xml_file_path) === false) {
+            throw new RuntimeException('Failed to load ' . $this->xml_file_path);
+        }
+
+        $products_list = $dom->getElementsByTagName('PRODUCTS')->item(0);
+
+        if ($products_list === null) {
+            throw new RuntimeException('The xml file has no PRODUCTS element.');
+        }
+
+        $product = $dom->createElement('PRODUCT');
+
+        // NAME, BARCODE and WEIGHT are kept as CDATA, the same way the existing products are written
+        $product->appendChild($this->create_cdata_element($dom, 'NAME', $name));
+        $product->appendChild($dom->createElement('PRICE', trim((string) ($data['PRICE'] ?? ''))));
+        $product->appendChild($dom->createElement('QUANTITY', trim((string) ($data['QUANTITY'] ?? ''))));
+
+        $category = $dom->createElement('CATEGORY');
+        $category->appendChild($dom->createTextNode(trim((string) ($data['CATEGORY'] ?? ''))));
+        $category_id = trim((string) ($data['CATEGORY_ID'] ?? ''));
+
+        if ($category_id !== '') {
+            $category->setAttribute('id', $category_id);
+        }
+
+        $product->appendChild($category);
+        $product->appendChild($dom->createElement('MANUFACTURER', trim((string) ($data['MANUFACTURER'] ?? ''))));
+        $product->appendChild($this->create_cdata_element($dom, 'BARCODE', trim((string) ($data['BARCODE'] ?? ''))));
+        $product->appendChild($this->create_cdata_element($dom, 'WEIGHT', trim((string) ($data['WEIGHT'] ?? ''))));
+        $product->appendChild($dom->createElement('INSTOCK', ($data['INSTOCK'] ?? 'Y') === 'N' ? 'N' : 'Y'));
+        $product->appendChild($dom->createElement('AVAILABILITY', trim((string) ($data['AVAILABILITY'] ?? ''))));
+
+        $products_list->appendChild($product);
+
+        $last_update = $dom->getElementsByTagName('LAST_UPDATE')->item(0);
+
+        if ($last_update !== null) {
+            $last_update->nodeValue = date('Y-m-d H:i');
+        }
+
+        if (file_put_contents($this->xml_file_path, $dom->saveXML(), LOCK_EX) === false) {
+            throw new RuntimeException('Failed to write ' . $this->xml_file_path);
+        }
+    }
+
+    /**
+     * Create CDATA element
+     *
+     * @throws \DOMException
+     */
+    private function create_cdata_element(DOMDocument $dom, string $tag, string $value): DOMElement
+    {
+        $element = $dom->createElement($tag);
+        $element->appendChild($dom->createCDATASection($value));
+
+        return $element;
+    }
 }
