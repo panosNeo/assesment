@@ -6,7 +6,7 @@
 
 <?php
     require_once("./../lib.php");
-    $productsList = new Products("./products.xml");
+    $productsList = new Products("./../products.xml");
     $productsList->print_html_table_with_all_products();
 
 ?>

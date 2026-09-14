@@ -9,22 +9,30 @@
 
             <PRICE>
                         64.9
-                    </PRICE>
+            </PRICE>
+
             <QUANTITY>3</QUANTITY>
+
             <CATEGORY id="113000102">
                         BOARDS-&gt;Complete Skateboards
-                    </CATEGORY>
+            </CATEGORY>
+
             <MANUFACTURER>
-                        ROCKET
-                    </MANUFACTURER>
+                ROCKET
+             </MANUFACTURER>
+
             <BARCODE>
                 <![CDATA[5056245544934]]>
             </BARCODE>
+
             <WEIGHT>
                 <![CDATA[6.1kg]]>
             </WEIGHT>
+
             <INSTOCK>Y</INSTOCK>
+
             <AVAILABILITY>Άμεσα Διαθέσιμο</AVAILABILITY>
+
         </PRODUCT>
         <PRODUCT>
             <NAME>
@@ -32,22 +40,29 @@
             </NAME>
 
             <PRICE>
-                        70
-                    </PRICE>
+                70
+            </PRICE>
+
             <QUANTITY>3</QUANTITY>
+
             <CATEGORY id="113000102">
-                        BOARDS-&gt;Complete Skateboards
-                    </CATEGORY>
+                BOARDS-&gt;Complete Skateboards
+            </CATEGORY>
+
             <MANUFACTURER>
-                        ROCKET
-                    </MANUFACTURER>
+               ROCKET
+            </MANUFACTURER>
+
             <BARCODE>
                 <![CDATA[5056245544934]]>
             </BARCODE>
+
             <WEIGHT>
                 <![CDATA[7.1kg]]>
             </WEIGHT>
+
             <INSTOCK>Y</INSTOCK>
+
             <AVAILABILITY>Άμεσα Διαθέσιμο</AVAILABILITY>
         </PRODUCT>
     </PRODUCTS>

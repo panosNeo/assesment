@@ -1,38 +1,65 @@
 <?php
-class Products
+readonly class Products
 {
-    private $xml_file_path = '';
-
-    public function __construct($xml_file_path = '')
-    {
-        $this->xml_file_path = $xml_file_path;
+    public function __construct(
+        private string $xml_file_path = ''
+    ) {
     }
 
     /**
      * This function prints an HTML table with all the products as read from the xml file
-     * @return void 
      */
-    public function print_html_table_with_all_products()
+    public function print_html_table_with_all_products(): void
     {
-        //TODO 1:Θα πρέπει να συμπληρώσουμε την συνάρτηση ώστε να κάνει print το HTML table με τα προϊόντα του xml
-        $xmldata = simplexml_load_file($this->xml_file_path) or die("Failed to load");
-        $xml_data = $xmldata->children();
+        $xml_data = simplexml_load_file($this->xml_file_path);
 
-        foreach ($xml_data->PRODUCTS->PRODUCT as $key => $prod) {
-            
-            $this->print_html_of_one_product_line($prod);
-        
+        if ($xml_data === false) {
+            echo '<p>Failed to load ' . htmlspecialchars($this->xml_file_path) . '</p>';
+            return;
         }
-        
+
+        echo '<table border="1" cellpadding="5" cellspacing="0">';
+        echo '<thead><tr>';
+        echo '<th>NAME</th>';
+        echo '<th>PRICE</th>';
+        echo '<th>QUANTITY</th>';
+        echo '<th>CATEGORY</th>';
+        echo '<th>MANUFACTURER</th>';
+        echo '<th>BARCODE</th>';
+        echo '<th>WEIGHT</th>';
+        echo '<th>INSTOCK</th>';
+        echo '<th>AVAILABILITY</th>';
+        echo '</tr></thead>';
+        echo '<tbody>';
+
+        foreach ($xml_data->PRODUCTS->PRODUCT as $prod) {
+            $this->print_html_of_one_product_line($prod);
+        }
+
+        echo '</tbody>';
+        echo '</table>';
     }
 
     /**
      * This function prints an HTML tr for a given product
-     * @param mixed $prod It is the product object as retrieved from the xml file
-     * @return void 
      */
-    private function print_html_of_one_product_line($prod){
-        //TODO 2: Θα πρέπει να συμπληρώσουμε τη συνάρτηση ώστε να κάνει print τα tr με τα στοιχεία του ενός προϊόντος
-        //var_dump($prod);
+    private function print_html_of_one_product_line(object $prod): void
+    {
+        echo '<tr>';
+        echo '<td>' . $this->clean($prod->NAME) . '</td>';
+        echo '<td>' . $this->clean($prod->PRICE) . '</td>';
+        echo '<td>' . $this->clean($prod->QUANTITY) . '</td>';
+        echo '<td>' . $this->clean($prod->CATEGORY) . '</td>';
+        echo '<td>' . $this->clean($prod->MANUFACTURER) . '</td>';
+        echo '<td>' . $this->clean($prod->BARCODE) . '</td>';
+        echo '<td>' . $this->clean($prod->WEIGHT) . '</td>';
+        echo '<td>' . $this->clean($prod->INSTOCK) . '</td>';
+        echo '<td>' . $this->clean($prod->AVAILABILITY) . '</td>';
+        echo '</tr>';
+    }
+
+    private function clean(mixed $value): string
+    {
+        return htmlspecialchars(trim((string) $value));
     }
 }
